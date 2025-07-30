@@ -160,6 +160,7 @@ Choose from 3 different AI interaction modes based on your experience level and 
 
 ### Installation in KiCad
 ![Installation Process](screenshots/installation-process.png)
+
 *Installing the plugin through KiCad Plugin Manager*
 
 ### PCB Analysis
