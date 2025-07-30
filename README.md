@@ -28,12 +28,13 @@ AI-powered PCB design assistant plugin for KiCad with Ollama integration.
 
 ### Method 1: KiCad Plugin Manager (Recommended)
 
-1. Download the latest release ZIP file
+1. **Download the plugin ZIP**: [kic-ai-assistant-v1.3.0-for-import.zip](kic-ai-assistant-v1.3.0-for-import.zip)
 2. Open KiCad → **Plugin and Content Manager**
 3. Click **Install from File**
 4. Select the downloaded ZIP file
 5. Restart KiCad
 
+> 💡 **Direct Download**: The ready-to-import ZIP file is included in this repository for your convenience!
 ### Method 2: Manual Installation
 
 1. Download and extract the plugin
@@ -252,3 +253,13 @@ If you encounter any issues or have questions:
 ---
 
 **Made with ❤️ for the KiCad community**
+
+## 📦 Download Options
+
+| File | Size | Description |
+|------|------|-------------|
+| [kic-ai-assistant-v1.3.0-for-import.zip](kic-ai-assistant-v1.3.0-for-import.zip) | ~10KB | **Ready-to-import plugin** - Use this for KiCad Plugin Manager |
+| [kic-ai-assistant-v1.3.0-with-screenshots.zip](kic-ai-assistant-v1.3.0-with-screenshots.zip) | ~4.7MB | Complete package with screenshots and documentation |
+
+> 🎯 **For most users**: Download the **for-import.zip** file - it's specifically prepared for KiCad's Plugin Manager!
+
