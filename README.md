@@ -158,6 +158,10 @@ Choose from 3 different AI interaction modes based on your experience level and 
 
 ![Mode Selection](screenshots/mode-selection.png)
 
+### Installation in KiCad
+![Installation Process](screenshots/installation-process.png)
+*Installing the plugin through KiCad Plugin Manager*
+
 ### PCB Analysis
 Automatic analysis provides comprehensive design insights and recommendations.
 
@@ -256,10 +260,16 @@ If you encounter any issues or have questions:
 
 ## 📦 Download Options
 
+**Ready to use:**
+- 📦 [kic-ai-assistant-v1.3.0-for-import.zip](kic-ai-assistant-v1.3.0-for-import.zip) (~10KB) - Direct import for KiCad Plugin Manager
+
+**For developers:**
+- �� Clone this repository for complete source code, documentation, and screenshots
+
+> 🎯 **For most users**: Download the **for-import.zip** file - it's specifically prepared for KiCad's Plugin Manager!
 | File | Size | Description |
 |------|------|-------------|
 | [kic-ai-assistant-v1.3.0-for-import.zip](kic-ai-assistant-v1.3.0-for-import.zip) | ~10KB | **Ready-to-import plugin** - Use this for KiCad Plugin Manager |
-| [kic-ai-assistant-v1.3.0-with-screenshots.zip](kic-ai-assistant-v1.3.0-with-screenshots.zip) | ~4.7MB | Complete package with screenshots and documentation |
 
 > 🎯 **For most users**: Download the **for-import.zip** file - it's specifically prepared for KiCad's Plugin Manager!
 
