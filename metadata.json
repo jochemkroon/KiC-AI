@@ -1,0 +1,42 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "KIC-AI Assistant",
+    "description": "AI-powered PCB design assistant with 3 interaction modes and Ollama integration",
+    "description_full": "AI assistant for KiCad PCB design with Ollama LLM integration. Features 3 interaction modes (Analysis, Advisory, Assistant) for different user needs. Analyze both PCB layouts and schematics, get design advice, and receive guided assistance.",
+    "identifier": "com.jochem.kic-ai-assistant",
+    "type": "plugin",
+    "author": {
+        "name": "Jochem",
+        "contact": {
+            "web": ""
+        }
+    },
+    "maintainer": {
+        "name": "Jochem", 
+        "contact": {
+            "web": ""
+        }
+    },
+    "license": "MIT",
+    "resources": {
+        "homepage": "",
+        "repository": ""
+    },
+    "tags": [
+        "ai",
+        "assistant", 
+        "pcb",
+        "schematic",
+        "analysis",
+        "design",
+        "guided",
+        "interactive"
+    ],
+    "versions": [
+        {
+            "version": "1.3.0",
+            "status": "stable",
+            "kicad_version": "6.0"
+        }
+    ]
+}
