@@ -28,7 +28,7 @@ AI-powered PCB design assistant plugin for KiCad with Ollama integration.
 
 ### Method 1: KiCad Plugin Manager (Recommended)
 
-1. **Download the plugin ZIP**: [kic-ai-assistant-v1.3.0-for-import.zip](kic-ai-assistant-v1.3.0-for-import.zip)
+1. **Download the plugin ZIP**: [kic-ai-assistant-v1.3.1-for-import.zip](kic-ai-assistant-v1.3.1-for-import.zip)
 2. Open KiCad → **Plugin and Content Manager**
 3. Click **Install from File**
 4. Select the downloaded ZIP file
@@ -111,10 +111,10 @@ Choose your preferred level of AI assistance:
 - **Example**: "To improve this circuit: 1) Select R14 2) Change value to 10kΩ 3) Update the schematic. Shall I guide you through this?"
 
 #### 🤖 Assistant Mode (Interactive)
-- **What it does**: Interactive design recommendations and future automation
+- **What it does**: Detailed step-by-step instructions and component-specific guidance
 - **Safety**: Advanced features for experienced users
 - **Best for**: Power users, complex design tasks
-- **Example**: "I can help optimize your power routing. In future versions, I may automate some placement tasks."
+- **Example**: "Removing J6: 1) Click on J6 2) Press Delete 3) Clean up connections 4) Update schematic 5) Run DRC"
 
 ### Example Questions
 
@@ -233,6 +233,12 @@ If you encounter any issues or have questions:
 
 ## 🔄 Changelog
 
+### v1.3.1
+- **ENHANCED**: Assistant Mode now provides detailed step-by-step instructions
+- **NEW**: Component-specific guidance for removal operations (e.g., "remove J6")
+- **IMPROVED**: More actionable and practical assistance in Assistant Mode
+- **FIXED**: Better AI prompts for specific component operations
+
 ### v1.3.0
 - **NEW**: 3 AI Interaction Modes (Analysis, Advisory, Assistant)
 - **NEW**: Mode-specific AI responses and behavior
@@ -261,7 +267,7 @@ If you encounter any issues or have questions:
 ## 📦 Download Options
 
 **Ready to use:**
-- 📦 [kic-ai-assistant-v1.3.0-for-import.zip](kic-ai-assistant-v1.3.0-for-import.zip) (~10KB) - Direct import for KiCad Plugin Manager
+- 📦 [kic-ai-assistant-v1.3.1-for-import.zip](kic-ai-assistant-v1.3.1-for-import.zip) (~10KB) - Direct import for KiCad Plugin Manager
 
 **For developers:**
 - �� Clone this repository for complete source code, documentation, and screenshots
@@ -269,7 +275,7 @@ If you encounter any issues or have questions:
 > 🎯 **For most users**: Download the **for-import.zip** file - it's specifically prepared for KiCad's Plugin Manager!
 | File | Size | Description |
 |------|------|-------------|
-| [kic-ai-assistant-v1.3.0-for-import.zip](kic-ai-assistant-v1.3.0-for-import.zip) | ~10KB | **Ready-to-import plugin** - Use this for KiCad Plugin Manager |
+| [kic-ai-assistant-v1.3.1-for-import.zip](kic-ai-assistant-v1.3.1-for-import.zip) | ~10KB | **Ready-to-import plugin** - Use this for KiCad Plugin Manager |
 
 > 🎯 **For most users**: Download the **for-import.zip** file - it's specifically prepared for KiCad's Plugin Manager!
 

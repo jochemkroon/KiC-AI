@@ -451,6 +451,13 @@ Choose the mode that fits your experience level and comfort with AI assistance."
         self.set_status("AI thinking...")
         self.send_btn.Enable(False)
         
+        # Check for component-specific guidance in Assistant mode
+        specific_guidance = self.get_component_specific_guidance(message)
+        if specific_guidance:
+            self.add_message("🤖 Assistant", specific_guidance)
+            self.send_btn.Enable(True)
+            self.set_status("Ready")
+            return
         # Start AI processing in thread
         thread = threading.Thread(target=self.send_to_ai, args=(message,))
         thread.daemon = True
@@ -612,7 +619,59 @@ Choose the mode that fits your experience level and comfort with AI assistance."
                                "I'll provide interactive guidance. In future versions, "
                                "I may be able to help automate some of these tasks.")
         
+        # Check for component-specific guidance in Assistant mode
+        specific_guidance = self.get_component_specific_guidance(message)
+        if specific_guidance:
+            self.add_message("🤖 Assistant", specific_guidance)
+            self.send_btn.Enable(True)
+            self.set_status("Ready")
+            return
         # Start AI processing in thread
         thread = threading.Thread(target=self.send_to_ai, args=(message,))
         thread.daemon = True
         thread.start()
+    
+    def get_component_specific_guidance(self, message):
+        """Provide specific guidance for common component operations"""
+        if self.interaction_mode != self.ASSISTANT_MODE:
+            return None
+            
+        message_lower = message.lower()
+        
+        # Check for specific component removal requests
+        if any(phrase in message_lower for phrase in ['remove j', 'delete j', 'remove connector']):
+            component = None
+            # Extract component reference
+            import re
+            match = re.search(r'[jJ]\d+', message)
+            if match:
+                component = match.group(0).upper()
+            
+            if component:
+                return f"""🔧 **Removing {component} - Step-by-step:**
+
+1. **Select the component:**
+   - Click on {component} in the PCB layout
+   - The component should highlight in selection color
+
+2. **Delete the component:**
+   - Press **Delete** key, or
+   - Right-click → Delete, or  
+   - Use Edit → Delete from menu
+
+3. **Clean up connections:**
+   - Check for any remaining tracks/vias
+   - Delete orphaned connections if needed
+
+4. **Update schematic (if needed):**
+   - Switch to schematic editor
+   - Remove {component} from schematic too
+   - Run Tools → Update PCB from Schematic
+
+5. **Verify design:**
+   - Check Design Rules (DRC)
+   - Verify no missing connections
+
+Would you like me to explain any of these steps in more detail?"""
+        
+        return None
