@@ -25,6 +25,16 @@ class AIAssistantDialog(wx.Frame):
         self.ASSISTANT_MODE = "assistant"    # Interactive recommendations (future: with actions)
         
         self.interaction_mode = self.ANALYSIS_MODE  # Default to safest mode
+        # Language settings
+        self.LANGUAGES = {
+            0: {"code": "en", "name": "English"},
+            1: {"code": "nl", "name": "Nederlands"},
+            2: {"code": "de", "name": "Deutsch"},
+            3: {"code": "es", "name": "Español"},
+            4: {"code": "fr", "name": "Français"},
+            5: {"code": "pt", "name": "Português"}
+        }
+
         
         # Icon instellen (optioneel)
         self.SetIcon(wx.Icon())
@@ -97,6 +107,26 @@ class AIAssistantDialog(wx.Frame):
         mode_sizer.Add(mode_help, 0, wx.ALIGN_CENTER_VERTICAL)
         
         main_sizer.Add(mode_sizer, 0, wx.EXPAND | wx.ALL, 10)
+        # Language selector
+        lang_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        lang_label = wx.StaticText(panel, label="Language / Taal:")
+        lang_label.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
+        
+        self.lang_choice = wx.Choice(panel, choices=[
+            "🇬�� English",
+            "🇳🇱 Nederlands", 
+            "🇩🇪 Deutsch",
+            "🇪🇸 Español",
+            "🇫🇷 Français",
+            "🇵🇹 Português"
+        ])
+        self.lang_choice.SetSelection(0)  # Default to English
+        
+        lang_sizer.Add(lang_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
+        lang_sizer.Add(self.lang_choice, 1, wx.EXPAND)
+        
+        main_sizer.Add(lang_sizer, 0, wx.EXPAND | wx.ALL, 10)
+
         
         # Chat area
         self.chat_ctrl = wx.TextCtrl(
@@ -675,3 +705,27 @@ Choose the mode that fits your experience level and comfort with AI assistance."
 Would you like me to explain any of these steps in more detail?"""
         
         return None
+    def get_language_prompt(self):
+        """Get language-specific prompt addition"""
+        selection = self.lang_choice.GetSelection()
+        if selection == -1:
+            selection = 0  # Default to English
+            
+        lang_info = self.LANGUAGES[selection]
+        lang_code = lang_info["code"]
+        
+        if lang_code == "en":
+            return ""  # English is default
+        elif lang_code == "nl":
+            return "BELANGRIJK: Antwoord in het Nederlands. Gebruik Nederlandse technische termen voor elektronica en PCB ontwerp."
+        elif lang_code == "de":
+            return "WICHTIG: Antworten Sie auf Deutsch. Verwenden Sie deutsche Fachbegriffe für Elektronik und PCB-Design."
+        elif lang_code == "es":
+            return "IMPORTANTE: Responde en español. Usa términos técnicos en español para electrónica y diseño de PCB."
+        elif lang_code == "fr":
+            return "IMPORTANT: Répondez en français. Utilisez des termes techniques français pour l'électronique et la conception de PCB."
+        elif lang_code == "pt":
+            return "IMPORTANTE: Responda em português. Use termos técnicos em português para eletrônica e design de PCB."
+        else:
+            return ""
+

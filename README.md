@@ -15,7 +15,7 @@ AI-powered PCB design assistant plugin for KiCad with Ollama integration.
 - **Design Advice**: Get practical suggestions for component placement, routing, and best practices
 - **Local LLM**: Uses Ollama for privacy-focused AI processing
 - **Conversation Memory**: AI remembers context throughout your design session
-- **Real-time Help**: Ask questions about your design and get instant, context-aware answers
+- **Multilingual Support**: Available in English, Nederlands, Deutsch, Español, Français, and Português- **🌍 Multilingual Support**: Choose from 6 languages (English, Nederlands, Deutsch, Español, Français, Português)- **Real-time Help**: Ask questions about your design and get instant, context-aware answers
 
 ## 📋 Requirements
 
@@ -28,7 +28,7 @@ AI-powered PCB design assistant plugin for KiCad with Ollama integration.
 
 ### Method 1: KiCad Plugin Manager (Recommended)
 
-1. **Download the plugin ZIP**: [kic-ai-assistant-v1.3.1-for-import.zip](kic-ai-assistant-v1.3.1-for-import.zip)
+1. **Download the plugin ZIP**: [kic-ai-assistant-v1.4.0-multilingual.zip](kic-ai-assistant-v1.4.0-multilingual.zip)
 2. Open KiCad → **Plugin and Content Manager**
 3. Click **Install from File**
 4. Select the downloaded ZIP file
@@ -158,11 +158,14 @@ Choose from 3 different AI interaction modes based on your experience level and 
 
 ![Mode Selection](screenshots/mode-selection.png)
 
-### Installation in KiCad
 ![Installation Process](screenshots/installation-process.png)
 
 *Installing the plugin through KiCad Plugin Manager*
 
+### Mode Selection
+Choose between PCB or Schematic analysis mode based on your current design context.
+
+![Mode Selection](screenshots/mode-selection.png)
 ### PCB Analysis
 Automatic analysis provides comprehensive design insights and recommendations.
 
@@ -234,6 +237,33 @@ If you encounter any issues or have questions:
 
 ## 🔄 Changelog
 
+### v1.4.0
+- **NEW**: �� Multilingual Support - Choose from 6 languages (EN, NL, DE, ES, FR, PT)
+- **NEW**: Language selector in the UI with flag icons
+- **NEW**: AI responses in your selected language with proper technical terms
+- **ENHANCED**: Localized interface elements and prompts
+- **IMPROVED**: Better international accessibility
+
+### v1.4.0
+- **NEW**: Multilingual Support - Choose from 6 languages (EN, NL, DE, ES, FR, PT)
+- **NEW**: Language selector in the UI with flag icons
+- **NEW**: Localized welcome messages and system responses
+- **IMPROVED**: Better mode selection explanation in screenshots section
+- **IMPROVED**: Enhanced installation documentation
+
+### v1.3.1
+- **ENHANCED**: Assistant Mode now provides detailed step-by-step instructions
+- **NEW**: Component-specific guidance for removal operations (e.g., "remove J6")
+- **IMPROVED**: More actionable and practical assistance in Assistant Mode
+- **FIXED**: Better AI prompts for specific component operations
+
+### v1.4.0
+- **NEW**: Multilingual Support - Choose from 6 languages (EN, NL, DE, ES, FR, PT)
+- **NEW**: Language selector in the UI with flag icons
+- **NEW**: Localized welcome messages and system responses
+- **IMPROVED**: Better mode selection explanation in screenshots section
+- **IMPROVED**: Enhanced installation documentation
+
 ### v1.3.1
 - **ENHANCED**: Assistant Mode now provides detailed step-by-step instructions
 - **NEW**: Component-specific guidance for removal operations (e.g., "remove J6")
@@ -268,7 +298,7 @@ If you encounter any issues or have questions:
 ## 📦 Download Options
 
 **Ready to use:**
-- 📦 [kic-ai-assistant-v1.3.1-for-import.zip](kic-ai-assistant-v1.3.1-for-import.zip) (~10KB) - Direct import for KiCad Plugin Manager
+- 📦 [kic-ai-assistant-v1.4.0-multilingual.zip](kic-ai-assistant-v1.4.0-multilingual.zip) (~10KB) - Direct import for KiCad Plugin Manager
 
 **For developers:**
 - �� Clone this repository for complete source code, documentation, and screenshots
@@ -276,7 +306,7 @@ If you encounter any issues or have questions:
 > 🎯 **For most users**: Download the **for-import.zip** file - it's specifically prepared for KiCad's Plugin Manager!
 | File | Size | Description |
 |------|------|-------------|
-| [kic-ai-assistant-v1.3.1-for-import.zip](kic-ai-assistant-v1.3.1-for-import.zip) | ~10KB | **Ready-to-import plugin** - Use this for KiCad Plugin Manager |
+| [kic-ai-assistant-v1.4.0-multilingual.zip](kic-ai-assistant-v1.4.0-multilingual.zip) | ~10KB | **Ready-to-import plugin** - Use this for KiCad Plugin Manager |
 
 > 🎯 **For most users**: Download the **for-import.zip** file - it's specifically prepared for KiCad's Plugin Manager!
 
