@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import wx
 import pcbnew
 import threading
@@ -113,7 +114,7 @@ class AIAssistantDialog(wx.Frame):
         lang_label.SetFont(wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
         
         self.lang_choice = wx.Choice(panel, choices=[
-            "🇬�� English",
+            "🇬🇧 English",
             "🇳🇱 Nederlands", 
             "🇩🇪 Deutsch",
             "🇪🇸 Español",
@@ -530,30 +531,39 @@ Choose the mode that fits your experience level and comfort with AI assistance."
             
             # Prepare system prompt based on context and interaction mode
             mode_instructions = self.get_mode_instructions()
+            language_instructions = self.get_language_prompt()
+            
+            # Debug: Print language instructions to verify they're working
+            if language_instructions:
+                print(f"DEBUG: Language instructions: {language_instructions}")
             
             if is_analysis:
                 if self.context_type == "schematic":
-                    system_prompt = ("You are an expert electronic circuit designer and schematic review specialist. "
+                    system_prompt = (f"{language_instructions} "
+                                   "You are an expert electronic circuit designer and schematic review specialist. "
                                    "Analyze the provided schematic data thoroughly and provide specific, practical advice. "
                                    "Look at component types, values, connections, and circuit topology. "
                                    "Focus on circuit functionality, component selection, and design best practices. "
                                    f"{mode_instructions} "
                                    "Reference previous conversation if relevant.")
                 else:
-                    system_prompt = ("You are an expert PCB design engineer. Analyze the provided PCB data thoroughly and provide specific, practical advice. "
+                    system_prompt = (f"{language_instructions} "
+                                   "You are an expert PCB design engineer. Analyze the provided PCB data thoroughly and provide specific, practical advice. "
                                    "Look at individual components, their values, positions, and relationships. "
                                    f"{mode_instructions} "
                                    "Reference previous conversation if relevant.")
             else:
                 if self.context_type == "schematic":
-                    system_prompt = ("You are a helpful schematic design assistant with access to the current schematic design. "
+                    system_prompt = (f"{language_instructions} "
+                                   "You are a helpful schematic design assistant with access to the current schematic design. "
                                    "When users ask about specific components, circuits, or connections, reference the actual schematic data provided. "
                                    "Give specific answers about component values, connections, and circuit topology when possible. "
                                    "Focus on circuit functionality, component selection, and electrical design principles. "
                                    f"{mode_instructions} "
                                    "Remember our conversation and build upon previous topics when relevant.")
                 else:
-                    system_prompt = ("You are a helpful PCB design assistant with access to the current PCB design. "
+                    system_prompt = (f"{language_instructions} "
+                                   "You are a helpful PCB design assistant with access to the current PCB design. "
                                    "When users ask about specific components (like resistors, capacitors, ICs), look up the actual component details from the PCB context provided. "
                                    "Give specific answers referencing actual component values, positions, and designators when possible. "
                                    "If asked about a specific component (e.g., 'R1', 'check this resistor'), find that component in the PCB data and provide detailed information about it. "
@@ -561,7 +571,12 @@ Choose the mode that fits your experience level and comfort with AI assistance."
                                    "Remember our conversation and build upon previous topics when relevant.")
             
             # Build final prompt with design context
-            final_prompt = system_prompt + conversation_context + design_context + f"\nUser question: {message}\n\nPlease provide a specific, helpful response based on the actual design data when applicable:"
+            # Add language instruction again at the end for extra emphasis
+            language_reminder = ""
+            if language_instructions:
+                language_reminder = f"\n\nREMEMBER: {language_instructions}"
+            
+            final_prompt = system_prompt + conversation_context + design_context + f"\nUser question: {message}\n\nPlease provide a specific, helpful response based on the actual design data when applicable:{language_reminder}"
             
             # API request
             data = {
@@ -569,14 +584,25 @@ Choose the mode that fits your experience level and comfort with AI assistance."
                 "prompt": final_prompt,
                 "stream": False,
                 "options": {
-                    "temperature": 0.6,
-                    "top_p": 0.9,
-                    "num_ctx": 4096,  # Verhoogd voor meer context
-                    "repeat_penalty": 1.1
+                    "temperature": 0.3,  # Lower temperature for more consistent language following
+                    "top_p": 0.8,
+                    "num_ctx": 4096,
+                    "repeat_penalty": 1.2,  # Higher penalty to avoid falling back to English
+                    "top_k": 20  # Limit choices to make language instruction more effective
                 }
             }
             
-            response = requests.post(url, json=data, timeout=60)  # Langere timeout
+            # Make sure all text is ASCII-safe before sending
+            try:
+                # Ensure the prompt is ASCII-safe
+                safe_prompt = final_prompt.encode('ascii', 'replace').decode('ascii')
+                data["prompt"] = safe_prompt
+            except:
+                # If that fails, use original
+                pass
+            
+            # API request with error handling
+            response = requests.post(url, json=data, timeout=60)
             
             if response.status_code == 200:
                 result = response.json()
@@ -717,15 +743,15 @@ Would you like me to explain any of these steps in more detail?"""
         if lang_code == "en":
             return ""  # English is default
         elif lang_code == "nl":
-            return "BELANGRIJK: Antwoord in het Nederlands. Gebruik Nederlandse technische termen voor elektronica en PCB ontwerp."
+            return "U MOET antwoorden in het Nederlands! Alle antwoorden in het Nederlands. Nederlandse termen voor elektronica gebruiken. Niet in het Engels antwoorden."
         elif lang_code == "de":
-            return "WICHTIG: Antworten Sie auf Deutsch. Verwenden Sie deutsche Fachbegriffe für Elektronik und PCB-Design."
+            return "Antworten Sie auf Deutsch! Alle Antworten auf Deutsch schreiben. Deutsche Begriffe fuer Elektronik verwenden. Nicht auf Englisch antworten."
         elif lang_code == "es":
-            return "IMPORTANTE: Responde en español. Usa términos técnicos en español para electrónica y diseño de PCB."
+            return "Responder en espanol! Todas las respuestas en espanol. Usar terminos tecnicos en espanol. No responder en ingles."
         elif lang_code == "fr":
-            return "IMPORTANT: Répondez en français. Utilisez des termes techniques français pour l'électronique et la conception de PCB."
+            return "Repondre en francais! Toutes les reponses en francais. Utiliser des termes techniques francais. Ne pas repondre en anglais."
         elif lang_code == "pt":
-            return "IMPORTANTE: Responda em português. Use termos técnicos em português para eletrônica e design de PCB."
+            return "Responder em portugues! Todas as respostas em portugues. Usar termos tecnicos em portugues. Nao responder em ingles."
         else:
             return ""
 
