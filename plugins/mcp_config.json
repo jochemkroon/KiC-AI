@@ -1,0 +1,26 @@
+{
+  "mcp_servers": {
+    "component_database": {
+      "command": ["python3", "-m", "mcp_servers.component_db"],
+      "description": "Component database with pricing and availability",
+      "enabled": true
+    },
+    "nexar_api": {
+      "command": ["python3", "-m", "mcp_servers.nexar"],
+      "description": "Nexar API - Multi-distributor pricing in one call (FREE tier: 1K calls/month)",
+      "enabled": true,
+      "requires_api_key": false
+    },
+    "kicad_tools": {
+      "command": ["python3", "-m", "mcp_servers.kicad_tools"],
+      "description": "KiCad design manipulation tools",
+      "enabled": true
+    }
+  },
+  "ai_enhancement": {
+    "enable_component_suggestions": true,
+    "enable_pricing_lookup": true,
+    "enable_automated_modifications": false,
+    "safety_mode": true
+  }
+}
