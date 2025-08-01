@@ -22,7 +22,7 @@ Thumbs.db
 
 # Release files
 *.zip
-!kic-ai-assistant-v*.zip
+!kicad-ai-assistant*.zip
 
 # IDE
 .vscode/
