@@ -1,4 +1,39 @@
-# Chang## [1.2.1] - 2025-07-30
+# Changelog
+
+## [1.5.0-MCP] - 2025-08-01
+
+### 🚀 Major New Features - MCP Integration
+- **Model Context Protocol (MCP) Support**: Revolutionary integration enabling AI to access external tools and databases
+- **Component Database Integration**: Real-time component pricing, availability, and specifications
+- **Enhanced AI Analysis**: PCB analysis now includes cost estimation and stock availability
+- **Smart Component Suggestions**: AI can suggest alternatives based on pricing, availability, and specifications
+- **MCP Server Framework**: Extensible architecture for adding new data sources and tools
+
+### 🔧 Technical Improvements
+- **MCP Client**: Full MCP protocol implementation for external tool integration
+- **Async Processing**: Non-blocking component database queries
+- **Safety Controls**: User confirmation required for all automated suggestions
+- **Error Handling**: Graceful fallback when MCP services are unavailable
+- **Configuration System**: Easy setup and management of MCP servers
+
+### 📊 Enhanced Capabilities
+- **Cost Analysis**: "Your PCB costs €12.34 with 45 components"
+- **Availability Checking**: Real-time stock level verification
+- **Alternative Components**: Smart suggestions for better/cheaper parts
+- **Supply Chain Intelligence**: Integration ready for Digi-Key, Mouser APIs
+
+### 🛡️ Safety & Reliability
+- **Safety Mode**: All MCP modifications require user approval
+- **Backward Compatibility**: Plugin works normally without MCP
+- **Graceful Degradation**: Automatic fallback to basic mode if MCP fails
+
+### 📁 New Files
+- `plugins/mcp_client.py` - MCP protocol client implementation
+- `plugins/mcp_config.json` - MCP server configuration
+- `mcp_servers/component_db.py` - Sample component database server
+- `MCP_SETUP.md` - Installation and configuration guide
+
+## [1.4.5] - 2025-07-31
 
 ### Documentation & UX Improvements
 - **Clarified Usage Instructions**: Updated README to clearly explain plugin is accessed via PCB Editor toolbar

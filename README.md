@@ -1,32 +1,38 @@
-# KIC-AI Assistant
+# KiCad AI Assistant
 
-AI-powered PCB design assistant plugin for KiCad with Ollama integration.
+**Intelligent AI assistant for KiCad PCB design with real-time component pricing via Nexar API**
 
 ![KiCad Plugin](https://img.shields.io/badge/KiCad-Plugin-blue)
 ![AI Powered](https://img.shields.io/badge/AI-Powered-green)
-![Ollama](https://img.shields.io/badge/Ollama-Integration-orange)
+![Nexar API](https://img.shields.io/badge/Nexar-API-orange)
 
-## 🎯 Quick Start
+## 🚀 Key Features
 
-**Ready to use:**
-- 📦 [kic-ai-assistant-v1.4.5-final.zip](kic-ai-assistant-v1.4.5-final.zip) (~11KB) - Direct import for KiCad Plugin Manager
-
-**For developers:**
-- 🔧 Clone this repository for complete source code, documentation, and screenshots
-
-> 🎯 **For most users**: Download the ZIP file - it's specifically prepared for KiCad's Plugin Manager!
-
-## ✨ Features
-
-- **AI Chat Interface**: Interactive dialog for PCB design assistance
-- **Dual Analysis Modes**: Support for both PCB layout and schematic/circuit analysis
-- **3 Interaction Levels**: Choose from Analysis, Advisory, or Assistant modes based on your needs
-- **Smart Mode Detection**: AI adapts responses based on selected interaction mode
-- **Design Advice**: Get practical suggestions for component placement, routing, and best practices
-- **Local LLM**: Uses Ollama for privacy-focused AI processing
-- **Conversation Memory**: AI remembers context throughout your design session
+- **Real-time Component Pricing**: Multi-distributor pricing from Digi-Key, Mouser, Farnell, Newark, Arrow, etc.
+- **AI-Powered Design Assistant**: Context-aware suggestions and optimizations
+- **Free Tier Available**: 1,000 API calls/month with Nexar API (no credit card required)
+- **Seamless Integration**: Works directly within KiCad interface
 - **🌍 Multilingual Support**: Choose from 6 languages (English, Nederlands, Deutsch, Español, Français, Português)
-- **Real-time Help**: Ask questions about your design and get instant, context-aware answers
+
+## 📋 Quick Setup
+
+### 1. Install Plugin
+Extract the plugin files to your KiCad plugins directory:
+- **Windows**: `%USERPROFILE%\Documents\KiCad\scripting\plugins\`
+- **macOS**: `~/Documents/KiCad/scripting/plugins/`  
+- **Linux**: `~/.kicad_plugins/`
+
+### 2. Get Free API Access
+1. Visit https://portal.nexar.com
+2. Create free account (1K calls/month)
+3. Create app and get API token
+4. Set environment: `export NEXAR_TOKEN="your_token"`
+
+### 3. Start Using
+Open KiCad → Tools → AI Assistant and start getting real component pricing!
+
+## 💡 Demo Mode
+Works immediately without API token using realistic demo data for testing.
 
 ## 📋 Requirements
 

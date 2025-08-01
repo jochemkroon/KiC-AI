@@ -3,12 +3,20 @@ import wx
 import pcbnew
 import threading
 import json
+import os
 
 try:
     import requests
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False
+
+# Import MCP client
+try:
+    from .mcp_client import MCPClient, KiCadMCPTools
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
 
 class AIAssistantDialog(wx.Frame):
     """AI Assistant Dialog voor PCB en Schematic design hulp met 3 interactie modi"""
@@ -26,6 +34,12 @@ class AIAssistantDialog(wx.Frame):
         self.ASSISTANT_MODE = "assistant"    # Interactive recommendations (future: with actions)
         
         self.interaction_mode = self.ANALYSIS_MODE  # Default to safest mode
+        
+        # MCP Integration
+        self.mcp_client = None
+        self.mcp_tools = None
+        self.mcp_enabled = False
+        
         # Language settings
         self.LANGUAGES = {
             0: {"code": "en", "name": "English"},
@@ -45,6 +59,9 @@ class AIAssistantDialog(wx.Frame):
         
         # UI opzetten
         self.init_ui()
+        
+        # Initialize MCP if available
+        self.init_mcp()
         
         # Centreer op scherm
         self.CenterOnScreen()
@@ -149,13 +166,16 @@ class AIAssistantDialog(wx.Frame):
         self.analyze_btn = wx.Button(panel, label=analyze_label)
         self.clear_btn = wx.Button(panel, label="Clear Chat")
         self.context_btn = wx.Button(panel, label="Show Context")
+        self.config_btn = wx.Button(panel, label="⚙️ Config")
+        self.config_btn.SetToolTip("Open configuration dialog")
         
         # Input layout
         input_sizer.Add(self.input_ctrl, 1, wx.EXPAND | wx.RIGHT, 5)
         input_sizer.Add(self.send_btn, 0, wx.RIGHT, 5)
         input_sizer.Add(self.analyze_btn, 0, wx.RIGHT, 5) 
         input_sizer.Add(self.clear_btn, 0, wx.RIGHT, 5)
-        input_sizer.Add(self.context_btn, 0)
+        input_sizer.Add(self.context_btn, 0, wx.RIGHT, 5)
+        input_sizer.Add(self.config_btn, 0)
         
         # Status bar
         self.status_text = wx.StaticText(panel, label="Ready")
@@ -171,12 +191,69 @@ class AIAssistantDialog(wx.Frame):
         # Events
         self.bind_events()
         
+    def init_mcp(self):
+        """Initialize MCP integration if available"""
+        if not MCP_AVAILABLE:
+            print("MCP not available - import failed")
+            return
+            
+        try:
+            # Load MCP configuration
+            config_path = os.path.join(os.path.dirname(__file__), 'mcp_config.json')
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    mcp_config = json.load(f)
+                
+                print(f"Loaded MCP config: {list(mcp_config.get('mcp_servers', {}).keys())}")
+                
+                # Initialize MCP client
+                self.mcp_client = MCPClient()
+                
+                # Connect to enabled servers
+                connected_servers = []
+                for server_name, server_config in mcp_config.get('mcp_servers', {}).items():
+                    if server_config.get('enabled', False):
+                        print(f"Attempting to connect to MCP server: {server_name}")
+                        success = self.mcp_client.connect_server(server_name, server_config)
+                        if success:
+                            connected_servers.append(server_name)
+                            print(f"✅ Connected to MCP server: {server_name}")
+                        else:
+                            print(f"❌ Failed to connect to MCP server: {server_name}")
+                
+                # Initialize KiCad MCP tools
+                if self.mcp_client and connected_servers:
+                    self.mcp_tools = KiCadMCPTools(self.mcp_client)
+                    self.mcp_enabled = True
+                    
+                    # Show available tools
+                    available_tools = self.mcp_client.get_available_tools()
+                    print(f"MCP Tools available: {available_tools}")
+                    
+                    # Add welcome message about MCP
+                    self.add_message("🔗 MCP Status", 
+                                   f"Connected to {len(connected_servers)} MCP servers:\n" +
+                                   f"• Servers: {', '.join(connected_servers)}\n" +
+                                   f"• Tools: {len(available_tools)} available\n" +
+                                   f"• Enhanced pricing and component data enabled!")
+                else:
+                    print("No MCP servers connected")
+            else:
+                print(f"MCP config file not found: {config_path}")
+                    
+        except Exception as e:
+            print(f"MCP initialization failed: {e}")
+            import traceback
+            traceback.print_exc()
+            self.mcp_enabled = False
+        
     def bind_events(self):
         """Bind UI events"""
         self.send_btn.Bind(wx.EVT_BUTTON, self.on_send)
         self.analyze_btn.Bind(wx.EVT_BUTTON, self.on_analyze)
         self.clear_btn.Bind(wx.EVT_BUTTON, self.on_clear)
         self.context_btn.Bind(wx.EVT_BUTTON, self.on_show_context)
+        self.config_btn.Bind(wx.EVT_BUTTON, self.on_config)
         self.mode_choice.Bind(wx.EVT_CHOICE, self.on_mode_change)
         self.input_ctrl.Bind(wx.EVT_TEXT_ENTER, self.on_send)
         self.Bind(wx.EVT_CLOSE, self.on_close)
@@ -288,10 +365,32 @@ Choose the mode that fits your experience level and comfort with AI assistance."
             context_info += f"(+ {len(self.conversation_history)//2 - 2} older exchanges in memory)"
             
         self.add_message("ℹ️ Context", context_info)
-        
-    def on_close(self, event):
-        """Sluit dialog"""
-        self.Destroy()
+    
+    def on_config(self, event):
+        """Handle configuration button click"""
+        try:
+            from config_dialog import ConfigurationDialog
+            
+            dlg = ConfigurationDialog(self)
+            try:
+                if dlg.ShowModal() == wx.ID_OK:
+                    # Configuration was saved, reinitialize MCP
+                    self.add_message("ℹ️ System", "Configuration updated. Reinitializing MCP connections...")
+                    self.init_mcp()
+            finally:
+                dlg.Destroy()
+        except ImportError as e:
+            wx.MessageBox(
+                f"Configuration dialog not available: {e}",
+                "Configuration Error",
+                wx.OK | wx.ICON_ERROR
+            )
+        except Exception as e:
+            wx.MessageBox(
+                f"Error opening configuration: {e}",
+                "Configuration Error", 
+                wx.OK | wx.ICON_ERROR
+            )
         
     def analyze_pcb(self):
         """Analyze current design in background thread"""
@@ -533,6 +632,18 @@ Choose the mode that fits your experience level and comfort with AI assistance."
             mode_instructions = self.get_mode_instructions()
             language_instructions = self.get_language_prompt()
             
+            # Enhanced context with MCP data
+            mcp_context = ""
+            try:
+                mcp_context = self.get_mcp_enhanced_context(message, design_context)
+                if mcp_context:
+                    print(f"DEBUG: MCP context added: {len(mcp_context)} characters")
+                else:
+                    print("DEBUG: No MCP context available")
+            except Exception as e:
+                print(f"DEBUG: MCP context error: {e}")
+                mcp_context = ""
+            
             # Debug: Print language instructions to verify they're working
             if language_instructions:
                 print(f"DEBUG: Language instructions: {language_instructions}")
@@ -576,7 +687,10 @@ Choose the mode that fits your experience level and comfort with AI assistance."
             if language_instructions:
                 language_reminder = f"\n\nREMEMBER: {language_instructions}"
             
-            final_prompt = system_prompt + conversation_context + design_context + f"\nUser question: {message}\n\nPlease provide a specific, helpful response based on the actual design data when applicable:{language_reminder}"
+            # Include MCP enhanced context
+            enhanced_context = mcp_context if mcp_context else ""
+            
+            final_prompt = system_prompt + conversation_context + design_context + enhanced_context + f"\nUser question: {message}\n\nPlease provide a specific, helpful response based on the actual design data when applicable:{language_reminder}"
             
             # API request
             data = {
@@ -754,4 +868,116 @@ Would you like me to explain any of these steps in more detail?"""
             return "Responder em portugues! Todas as respostas em portugues. Usar termos tecnicos em portugues. Nao responder em ingles."
         else:
             return ""
+    
+    def get_mcp_enhanced_context(self, message: str, design_context: str) -> str:
+        """Get enhanced context using MCP tools"""
+        if not self.mcp_enabled or not self.mcp_tools:
+            return ""
+        
+        enhanced_context = "\n\n=== ENHANCED CONTEXT (via MCP) ==="
+        
+        try:
+            # Debug: Check if MCP is working
+            available_tools = self.mcp_client.get_available_tools()
+            if available_tools:
+                enhanced_context += f"\nMCP Status: ✅ Active ({len(available_tools)} tools available)"
+                enhanced_context += f"\nAvailable tools: {', '.join(available_tools)}"
+            else:
+                enhanced_context += "\nMCP Status: ❌ No tools available"
+                return enhanced_context
+            
+            # Always try to provide component pricing context for any component-related query
+            if any(word in message.lower() for word in ['price', 'pricing', 'cost', 'resistor', 'component', 'expensive', 'cheap']):
+                
+                # Extract component references from design context
+                import re
+                component_refs = re.findall(r'([RCLUDQJ]\d+):', design_context)
+                
+                if component_refs:
+                    # Get pricing for first few components
+                    sample_refs = component_refs[:8]  # Increase sample size
+                    enhanced_context += f"\nAnalyzing pricing for components: {sample_refs}"
+                    
+                    # Try component database pricing
+                    try:
+                        pricing_data = self.mcp_tools.get_component_pricing(sample_refs)
+                        
+                        if pricing_data:
+                            enhanced_context += "\n\nCOMPONENT PRICING (Component Database):"
+                            for ref, price_info in pricing_data.items():
+                                price = price_info.get('unit_price', 'N/A')
+                                stock = price_info.get('stock', 'Unknown')
+                                enhanced_context += f"\n{ref}: ${price} (Stock: {stock} units)"
+                        else:
+                            enhanced_context += "\nNo pricing data available from component database"
+                    except Exception as e:
+                        enhanced_context += f"\nPricing lookup error: {e}"
+                    
+                    # Try Digi-Key search for common components
+                    if any(word in message.lower() for word in ['resistor', 'price']):
+                        try:
+                            digikey_result = self.mcp_client.call_tool("search_parts", {
+                                "keywords": "resistor 0805 1% smd"
+                            })
+                            
+                            if digikey_result and 'result' in digikey_result:
+                                parts = digikey_result['result'].get('parts', [])
+                                if parts:
+                                    enhanced_context += "\n\nDIGI-KEY RESISTOR PRICING:"
+                                    for part in parts[:3]:  # Show top 3 results
+                                        enhanced_context += f"\n• {part['part_number']}: ${part['unit_price']} - {part['description']}"
+                                        enhanced_context += f"  Stock: {part['quantity_available']} units"
+                        except Exception as e:
+                            enhanced_context += f"\nDigi-Key search error: {e}"
+                
+                else:
+                    enhanced_context += "\nNo component references found in current design"
+                    # Still try to provide general pricing info
+                    try:
+                        # Get general resistor pricing
+                        digikey_result = self.mcp_client.call_tool("search_parts", {
+                            "keywords": "resistor 0805"
+                        })
+                        
+                        if digikey_result and 'result' in digikey_result:
+                            parts = digikey_result['result'].get('parts', [])
+                            if parts:
+                                enhanced_context += "\n\nGENERAL RESISTOR PRICING (Digi-Key):"
+                                for part in parts[:2]:  # Show top 2 results
+                                    enhanced_context += f"\n• {part['description']}: ${part['unit_price']}"
+                    except Exception as e:
+                        enhanced_context += f"\nGeneral pricing lookup error: {e}"
+            
+            # Component search and alternatives
+            if any(word in message.lower() for word in ['suggest', 'alternative', 'replace', 'better', 'cheaper']):
+                enhanced_context += "\n\nALTERNATIVE SUGGESTIONS:"
+                enhanced_context += "\nMCP tools can provide component alternatives and cost optimization suggestions."
+                
+                # Try to get alternatives for first resistor if available
+                import re
+                resistors = re.findall(r'(R\d+):', design_context)
+                if resistors:
+                    try:
+                        alt_result = self.mcp_client.call_tool("get_alternatives", {
+                            "part_number": resistors[0]
+                        })
+                        if alt_result and 'result' in alt_result:
+                            alternatives = alt_result['result'].get('alternatives', [])
+                            if alternatives:
+                                enhanced_context += f"\nAlternatives for {resistors[0]}:"
+                                for alt in alternatives[:2]:
+                                    enhanced_context += f"\n• {alt['part_number']}: ${alt['unit_price']} ({alt['manufacturer']})"
+                    except Exception as e:
+                        enhanced_context += f"\nAlternative lookup error: {e}"
+                
+        except Exception as e:
+            enhanced_context += f"\n\nMCP Error: {str(e)}"
+        
+        return enhanced_context
+    
+    def on_close(self, event):
+        """Sluit dialog en clean up MCP connections"""
+        if self.mcp_client:
+            self.mcp_client.disconnect_all()
+        self.Destroy()
 
