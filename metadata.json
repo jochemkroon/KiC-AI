@@ -1,8 +1,8 @@
 {
     "$schema": "https://go.kicad.org/pcm/schemas/v1",
     "name": "KIC-AI Assistant",
-    "description": "�� Multilingual AI-powered PCB design assistant supporting EN, NL, DE, ES, FR, PT with 3 interaction modes and dual PCB/schematic analysis. Choose your language for localized technical assistance.",
-    "description_full": "AI assistant for KiCad PCB design with Ollama LLM integration. Features 3 interaction modes (Analysis, Advisory, Assistant) for different user needs. Analyze both PCB layouts and schematics, get design advice, and receive guided assistance.",
+    "description": "🤖 Multilingual AI-powered PCB design assistant with real-time component pricing. Supports EN, NL, DE, ES, FR, PT with 3 interaction modes and dual PCB/schematic analysis. Includes Nexar API integration for distributor pricing.",
+    "description_full": "AI assistant for KiCad PCB design with Ollama LLM integration and component pricing. Features 3 interaction modes (Analysis, Advisory, Assistant), real-time pricing from multiple distributors via Nexar API, configuration management, and support for both PCB layouts and schematics.",
     "identifier": "com.jochem.kic-ai-assistant",
     "type": "plugin",
     "author": {
@@ -29,14 +29,16 @@
         "schematic",
         "analysis",
         "design",
+        "pricing",
+        "nexar",
         "guided",
         "interactive"
     ],
     "versions": [
         {
-            "version": "1.4.0",
+            "version": "2.3.0",
             "status": "stable",
-            "kicad_version": "6.0"
+            "kicad_version": "9.0"
         }
     ]
 }

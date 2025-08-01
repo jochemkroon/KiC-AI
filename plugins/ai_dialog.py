@@ -2,7 +2,10 @@
 import wx
 import pcbnew
 import threading
+from datetime import datetime
 import json
+import logging
+from config_manager import ConfigManager, ConfigDialog
 
 try:
     import requests
@@ -44,6 +47,12 @@ class AIAssistantDialog(wx.Frame):
         self.conversation_history = []
         
         # UI opzetten
+        # Initialize configuration manager
+        self.config_manager = ConfigManager()
+        
+        # Apply saved settings
+        self.apply_saved_settings()
+        
         self.init_ui()
         
         # Centreer op scherm
@@ -81,6 +90,19 @@ class AIAssistantDialog(wx.Frame):
         
         self.add_message("🤖 KIC-AI", welcome_msg)
         
+    def apply_saved_settings(self):
+        """Apply saved configuration settings"""
+        try:
+            # Load AI mode
+            saved_mode = self.config_manager.get("ai_mode", "analysis")
+            if saved_mode in ["analysis", "chat", "expert"]:
+                self.interaction_mode = saved_mode
+            
+            # Language will be applied when the choice control is created
+            
+        except Exception as e:
+            print(f"Error applying saved settings: {e}")
+        
     def init_ui(self):
         """Initialiseer de user interface"""
         panel = wx.Panel(self)
@@ -98,7 +120,10 @@ class AIAssistantDialog(wx.Frame):
             "📋 Advisory Mode (Guided)", 
             "🤖 Assistant Mode (Interactive)"
         ])
-        self.mode_choice.SetSelection(0)  # Default to Analysis mode
+        # Apply saved mode
+        saved_mode = self.config_manager.get("ai_mode", "analysis")
+        mode_map = {"analysis": 0, "chat": 1, "expert": 2}
+        self.mode_choice.SetSelection(mode_map.get(saved_mode, 0))
         
         mode_help = wx.Button(panel, label="?", size=(30, -1))
         mode_help.SetToolTip("Click for mode explanations")
@@ -121,7 +146,13 @@ class AIAssistantDialog(wx.Frame):
             "🇫🇷 Français",
             "🇵🇹 Português"
         ])
-        self.lang_choice.SetSelection(0)  # Default to English
+        # Apply saved language
+        saved_lang = self.config_manager.get("language", "English")
+        lang_map = {
+            "English": 0, "Nederlands": 1, "Deutsch": 2, 
+            "Español": 3, "Français": 4, "Português": 5
+        }
+        self.lang_choice.SetSelection(lang_map.get(saved_lang, 0))
         
         lang_sizer.Add(lang_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.RIGHT, 10)
         lang_sizer.Add(self.lang_choice, 1, wx.EXPAND)
@@ -147,13 +178,17 @@ class AIAssistantDialog(wx.Frame):
         self.send_btn = wx.Button(panel, label="Send")
         analyze_label = "Analyze Schematic" if self.context_type == "schematic" else "Analyze PCB"
         self.analyze_btn = wx.Button(panel, label=analyze_label)
+        self.pricing_btn = wx.Button(panel, label="💰 Pricing")
+        self.config_btn = wx.Button(panel, label="⚙️ Config")
         self.clear_btn = wx.Button(panel, label="Clear Chat")
         self.context_btn = wx.Button(panel, label="Show Context")
         
         # Input layout
         input_sizer.Add(self.input_ctrl, 1, wx.EXPAND | wx.RIGHT, 5)
         input_sizer.Add(self.send_btn, 0, wx.RIGHT, 5)
-        input_sizer.Add(self.analyze_btn, 0, wx.RIGHT, 5) 
+        input_sizer.Add(self.analyze_btn, 0, wx.RIGHT, 5)
+        input_sizer.Add(self.pricing_btn, 0, wx.RIGHT, 5)
+        input_sizer.Add(self.config_btn, 0, wx.RIGHT, 5)
         input_sizer.Add(self.clear_btn, 0, wx.RIGHT, 5)
         input_sizer.Add(self.context_btn, 0)
         
@@ -175,6 +210,8 @@ class AIAssistantDialog(wx.Frame):
         """Bind UI events"""
         self.send_btn.Bind(wx.EVT_BUTTON, self.on_send)
         self.analyze_btn.Bind(wx.EVT_BUTTON, self.on_analyze)
+        self.pricing_btn.Bind(wx.EVT_BUTTON, self.on_pricing)
+        self.config_btn.Bind(wx.EVT_BUTTON, self.on_config)
         self.clear_btn.Bind(wx.EVT_BUTTON, self.on_clear)
         self.context_btn.Bind(wx.EVT_BUTTON, self.on_show_context)
         self.mode_choice.Bind(wx.EVT_CHOICE, self.on_mode_change)
@@ -754,4 +791,216 @@ Would you like me to explain any of these steps in more detail?"""
             return "Responder em portugues! Todas as respostas em portugues. Usar termos tecnicos em portugues. Nao responder em ingles."
         else:
             return ""
+
+    def on_pricing(self, event):
+        """Get component pricing via Nexar API"""
+        self.set_status("Getting pricing...")
+        self.pricing_btn.Enable(False)
+        
+        # Start pricing in thread
+        thread = threading.Thread(target=self.get_component_pricing)
+        thread.daemon = True
+        thread.start()
+        
+    def get_component_pricing(self):
+        """Get pricing for components in current design"""
+        try:
+            # Import the MCP client
+            import sys
+            import os
+            
+            # Add the plugins directory to path so we can import simple_mcp_client
+            plugins_dir = os.path.dirname(os.path.abspath(__file__))
+            if plugins_dir not in sys.path:
+                sys.path.insert(0, plugins_dir)
+                
+            from simple_mcp_client_embedded import SimpleMCPClient
+            
+            # Get components from current design
+            board = pcbnew.GetBoard()
+            if not board:
+                wx.CallAfter(self.add_message, "❌ Error", "No PCB loaded")
+                return
+                
+            footprints = list(board.GetFootprints())
+            if not footprints:
+                wx.CallAfter(self.add_message, "💰 Pricing", "No components found in PCB")
+                return
+            
+            # Get API key from configuration
+            nexar_api_key = self.config_manager.get_nexar_api_key()
+            
+            # Create MCP client with API key
+            client = SimpleMCPClient(api_key=nexar_api_key)
+            
+            # Start Nexar server (should work in demo mode without API key)
+            wx.CallAfter(self.add_message, "💰 Pricing", "🚀 Starting Nexar pricing service...")
+            
+            if not client.start_nexar_server():
+                # Get more detailed error info
+                error_msg = "Failed to start Nexar pricing server.\n\n"
+                error_msg += "💡 This should work in demo mode without API keys.\n"
+                error_msg += "Please check that Python3 is installed and working.\n\n"
+                error_msg += "Debug info:\n"
+                error_msg += f"• Python executable: python3\n"
+                error_msg += f"• Server path: mcp_servers/nexar.py\n"
+                error_msg += f"• Working directory: {os.getcwd()}\n"
+                
+                wx.CallAfter(self.add_message, "❌ Error", error_msg)
+                return
+            
+            wx.CallAfter(self.add_message, "💰 Pricing", "🔍 Searching for component pricing...")
+            
+            # Get unique component values for pricing
+            component_values = set()
+            component_refs = {}  # Track which refs use which values
+            
+            for fp in footprints:
+                value = fp.GetValue().strip()
+                ref = fp.GetReference()
+                
+                if value and value not in ['', '~', 'DNP']:
+                    component_values.add(value)
+                    if value not in component_refs:
+                        component_refs[value] = []
+                    component_refs[value].append(ref)
+            
+            if not component_values:
+                wx.CallAfter(self.add_message, "💰 Pricing", "No component values found for pricing")
+                return
+            
+            # Search for pricing on unique values
+            pricing_results = []
+            found_count = 0
+            
+            for value in sorted(component_values):
+                try:
+                    results = client.search_parts(value)
+                    
+                    if results and len(results) > 0:
+                        best_match = results[0]  # Take first result
+                        refs_using = component_refs[value]
+                        
+                        pricing_results.append({
+                            'value': value,
+                            'refs': refs_using,
+                            'part': best_match
+                        })
+                        found_count += 1
+                        
+                        # Progress update
+                        wx.CallAfter(self.add_message, "💰 Progress", 
+                                   f"✅ Found pricing for {value} (used by: {', '.join(refs_using[:3])}{'...' if len(refs_using) > 3 else ''})")
+                        
+                except Exception as e:
+                    print(f"Error searching for {value}: {e}")
+                    continue
+            
+            # Stop the server
+            client.stop_server()
+            
+            # Format results
+            if not pricing_results:
+                wx.CallAfter(self.add_message, "💰 Pricing", 
+                           "No pricing found. This is normal for custom values like resistor/capacitor values.\n"
+                           "Try searching for specific part numbers instead.")
+                return
+            
+            # Create pricing report
+            report = f"💰 **COMPONENT PRICING REPORT**\n\n"
+            report += f"Found pricing for {found_count}/{len(component_values)} unique component values:\n\n"
+            
+            total_cost = 0.0
+            
+            for result in pricing_results:
+                value = result['value']
+                refs = result['refs']
+                part = result['part']
+                
+                report += f"**{value}** (x{len(refs)})\n"
+                report += f"Used by: {', '.join(refs[:5])}{'...' if len(refs) > 5 else ''}\n"
+                
+                if 'part_number' in part:
+                    report += f"Part: {part['part_number']}\n"
+                if 'manufacturer' in part:
+                    report += f"Mfg: {part['manufacturer']}\n"
+                
+                # Show pricing from different distributors
+                if 'pricing' in part and part['pricing']:
+                    report += "Pricing (qty 1):\n"
+                    for distributor, price_info in part['pricing'].items():
+                        price = price_info.get('price_1', 'N/A')
+                        stock = price_info.get('stock', 'N/A')
+                        report += f"  • {distributor}: ${price} (stock: {stock})\n"
+                        
+                        # Add to total cost estimate (using first available price)
+                        if isinstance(price, (int, float)) and price > 0:
+                            total_cost += price * len(refs)
+                
+                report += "\n"
+            
+            if total_cost > 0:
+                report += f"**Estimated total cost: ${total_cost:.2f}**\n"
+                report += "(Based on quantity 1 pricing - bulk pricing may be available)\n\n"
+            
+            report += "💡 **Tips:**\n"
+            report += "• Prices are from demo data - real API provides live pricing\n"
+            report += "• Bulk quantities often have better pricing\n"
+            report += "• Consider component availability and lead times\n"
+            report += "• Some generic values (like 10kΩ) may not have specific parts matched"
+            
+            wx.CallAfter(self.add_message, "💰 Pricing Report", report)
+            
+        except ImportError as e:
+            wx.CallAfter(self.add_message, "❌ Error", 
+                        f"MCP client not available: {e}\n"
+                        "The simple_mcp_client.py file may be missing.")
+        except Exception as e:
+            wx.CallAfter(self.add_message, "❌ Error", f"Pricing error: {str(e)}")
+        finally:
+            wx.CallAfter(self.pricing_btn.Enable, True)
+            wx.CallAfter(self.set_status, "Ready")
+
+    def on_config(self, event):
+        """Open configuration dialog"""
+        try:
+            # Create and show configuration dialog
+            config_dialog = ConfigDialog(self, self.config_manager)
+            
+            if config_dialog.ShowModal() == wx.ID_OK:
+                # Configuration was saved, apply new settings
+                self.apply_saved_settings()
+                
+                # Update UI elements to reflect new settings
+                self.update_ui_from_config()
+                
+                # Show confirmation
+                self.add_message("⚙️ Config", "Configuration updated successfully!")
+            
+            config_dialog.Destroy()
+            
+        except Exception as e:
+            wx.MessageBox(f"Config error: {str(e)}", "Error", wx.OK | wx.ICON_ERROR)
+    
+    def update_ui_from_config(self):
+        """Update UI elements from configuration"""
+        try:
+            # Update mode selection
+            saved_mode = self.config_manager.get("ai_mode", "analysis")
+            mode_map = {"analysis": 0, "chat": 1, "expert": 2}
+            mode_selection = mode_map.get(saved_mode, 0)
+            self.mode_choice.SetSelection(mode_selection)
+            self.interaction_mode = saved_mode
+            
+            # Update language selection
+            saved_lang = self.config_manager.get("language", "English")
+            lang_map = {
+                "English": 0, "Nederlands": 1, "Deutsch": 2, 
+                "Español": 3, "Français": 4, "Português": 5
+            }
+            lang_selection = lang_map.get(saved_lang, 0)
+            self.lang_choice.SetSelection(lang_selection)
+            
+        except Exception as e:
+            print(f"Error updating UI from config: {e}")
 
