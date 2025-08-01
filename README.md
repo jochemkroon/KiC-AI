@@ -17,7 +17,7 @@
 ## 📋 Quick Setup
 
 ### 1. Install Plugin
-Extract the plugin files to your KiCad plugins directory:
+**For most users**: Download [kicad-ai-assistant.zip](kicad-ai-assistant.zip) and extract to your KiCad plugins directory:
 - **Windows**: `%USERPROFILE%\Documents\KiCad\scripting\plugins\`
 - **macOS**: `~/Documents/KiCad/scripting/plugins/`  
 - **Linux**: `~/.kicad_plugins/`

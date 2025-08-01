@@ -1,8 +1,8 @@
 {
     "$schema": "https://go.kicad.org/pcm/schemas/v1",
-    "name": "KIC-AI Assistant with MCP",
-    "description": "🚀 Revolutionary AI assistant with Model Context Protocol (MCP) integration! Real-time component pricing, availability checking, and smart alternatives. Multilingual support (EN, NL, DE, ES, FR, PT) with external database access.",
-    "description_full": "Advanced AI assistant for KiCad with MCP (Model Context Protocol) integration enabling real-time component data access. Features: component pricing lookup, stock availability checking, smart alternative suggestions, cost analysis, and traditional PCB/schematic analysis. Three interaction modes (Analysis, Advisory, Assistant) with multilingual support.",
+    "name": "KiCad AI Assistant with Nexar API",
+    "description": "🚀 AI assistant with real-time component pricing from Nexar API! Multi-distributor pricing (Digi-Key, Mouser, Farnell, etc.) in one call. FREE tier: 1K calls/month. Multilingual support (EN, NL, DE, ES, FR, PT).",
+    "description_full": "Advanced AI assistant for KiCad with Nexar API integration for real-time component pricing from multiple distributors. Features: multi-distributor pricing comparison, stock availability, smart alternatives, BOM cost analysis, and PCB/schematic design assistance. Free tier available with 1000 API calls per month. Three interaction modes with multilingual support.",
     "identifier": "com.jochem.kic-ai-assistant",
     "type": "plugin",
     "author": {
@@ -29,12 +29,14 @@
         "schematic",
         "analysis",
         "design",
-        "guided",
-        "interactive"
+        "pricing",
+        "components",
+        "nexar",
+        "distributors"
     ],
     "versions": [
         {
-                "version": "1.5.0",
+            "version": "2.0.0",
             "status": "stable",
             "kicad_version": "6.0"
         }
